@@ -12,18 +12,18 @@ async function getDashboardData(query) {
         const weathers = await weathersRes.json();
         const airports = await airportsRes.json();
 
-        // Prendiamo il primo risultato di ogni array
-        const destination = destinations[0];
-        const weather = weathers[0];
-        const airport = airports[0];
+        // Prendiamo il primo risultato di ogni array (se esiste)
+        const destination = destinations[0] || null;
+        const weather = weathers[0] || null;
+        const airport = airports[0] || null;
 
         // Creiamo l'oggetto con i dati aggregati
         const dashboardData = {
-            city: destination?.name || 'N/A',
-            country: destination?.country || 'N/A',
-            temperature: weather?.temperature || 'N/A',
-            weather: weather?.weather_description || 'N/A',
-            airport: airport?.name || 'N/A'
+            city: destination?.name || null,
+            country: destination?.country || null,
+            temperature: weather?.temperature || null,
+            weather: weather?.weather_description || null,
+            airport: airport?.name || null
         };
 
         return dashboardData;
@@ -34,12 +34,36 @@ async function getDashboardData(query) {
     }
 }
 
-// Test della funzione con "london"
+// Funzione per stampare i dati in modo formattato
+function printDashboard(data, query) {
+    console.log(`📊 Dashboard per "${query}":`);
+
+    if (data.city && data.country) {
+        console.log(`📍 ${data.city}, ${data.country}`);
+    }
+
+    if (data.temperature && data.weather) {
+        console.log(`🌡️ ${data.temperature}°C, ${data.weather}`);
+    }
+
+    if (data.airport) {
+        console.log(`✈️ Aeroporto: ${data.airport}`);
+    }
+
+    // Se tutti i dati sono null
+    if (!data.city && !data.country && !data.temperature && !data.weather && !data.airport) {
+        console.log('❌ Nessun dato trovato per questa città');
+    }
+
+    console.log('---');
+}
+
+// Test con "london" (tutti i dati presenti)
 getDashboardData("london")
-    .then(data => {
-        console.log(`Dashboard per ${data.city}, ${data.country}:`);
-        console.log(`- Temperatura: ${data.temperature}°C`);
-        console.log(`- Meteo: ${data.weather}`);
-        console.log(`- Aeroporto principale: ${data.airport}`);
-    })
+    .then(data => printDashboard(data, "london"))
+    .catch(error => console.error('Test fallito:', error));
+
+// Test con "vienna" (dove manca il meteo)
+getDashboardData("vienna")
+    .then(data => printDashboard(data, "vienna"))
     .catch(error => console.error('Test fallito:', error));
